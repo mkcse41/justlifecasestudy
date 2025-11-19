@@ -84,6 +84,7 @@ public class BookingServiceImpl implements IBookingService {
 	@Autowired
 	private BookingMapper bookingMapper;
 
+	@Transactional
 	@Override
 	public BookingSummaryResDTO createBooking(BookingRequestDTO request) {
 
@@ -118,6 +119,13 @@ public class BookingServiceImpl implements IBookingService {
 				.collect(Collectors.toList());
 
 		logger.info("Selected professional IDs for booking: {}", selectedCleanerIds);
+
+		// Step 3.1 - Real Concurrency check
+		Timestamp newStart = Timestamp.valueOf(request.getStartTime().atDate(request.getDate()));
+		Timestamp newEnd = Timestamp
+				.valueOf(request.getStartTime().plusHours(request.getDurationHours()).atDate(request.getDate()));
+
+		checkCleanerConflicts(selectedCleanerIds, newStart, newEnd);
 
 		// STEP 4: Save Booking
 		Bookings booking = saveBooking(request);
@@ -227,6 +235,16 @@ public class BookingServiceImpl implements IBookingService {
 			bc.setStatus("ASSIGNED");
 			bc.setCreatedDt(now);
 			bookingCleanersRepository.save(bc);
+		}
+	}
+
+	private void checkCleanerConflicts(List<Long> cleanerIds, Timestamp start, Timestamp end) {
+
+		List<Long> conflicts = bookingCleanersRepository.findLockedConflictingAssignments(cleanerIds, start, end);
+
+		if (!conflicts.isEmpty()) {
+			logger.warn("Conflict detected! Cleaners already booked. Conflicting rows = {}", conflicts);
+			throw new BadRequestException("Selected cleaners are already booked for this timeframe.");
 		}
 	}
 

@@ -52,6 +52,11 @@ import com.justlife.casestudy.service.RuleConfigService;
 import com.justlife.casestudy.service.impl.BookingServiceImpl;
 import com.justlife.casestudy.utils.CommonUtils;
 
+/**
+ * 
+ * @author Mukesh.K
+ *
+ */
 @ExtendWith(MockitoExtension.class)
 class BookingServiceImplTest {
 

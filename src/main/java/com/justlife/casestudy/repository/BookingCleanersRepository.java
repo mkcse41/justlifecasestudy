@@ -1,5 +1,6 @@
 package com.justlife.casestudy.repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,4 +28,13 @@ public interface BookingCleanersRepository extends JpaRepository<BookingCleaners
 	@Modifying
 	@Query(value = "UPDATE BOOKING_CLEANERS SET ASSIGNMENT_STATUS = 'RELEASED' WHERE BOOKING_ID = :bookingId", nativeQuery = true)
 	void releaseCleaners(@Param("bookingId") Long bookingId);
+
+	@Query(value = "SELECT bc.ID FROM BOOKING_CLEANERS bc JOIN BOOKINGS b ON bc.BOOKING_ID = b.ID "
+			+ "WHERE bc.PROFESSIONAL_CLEANER_ID IN (:professionalIds) AND bc.ASSIGNMENT_STATUS = 'ASSIGNED' "
+			+ "AND b.STATUS IN ('CONFIRMED', 'IN_PROGRESS') AND b.STARTED_AT < :newEnd "
+			+ "AND DATE_ADD(b.STARTED_AT, INTERVAL b.DURATION_HOURS HOUR) > :newStart "
+			+ "FOR UPDATE", nativeQuery = true)
+	List<Long> findLockedConflictingAssignments(@Param("professionalIds") List<Long> professionalIds,
+			@Param("newStart") Timestamp newStart, @Param("newEnd") Timestamp newEnd);
+
 }
