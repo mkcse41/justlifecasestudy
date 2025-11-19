@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -154,7 +155,7 @@ public class BookingServiceImpl implements IBookingService {
 		LocalTime workEnd = ruleConfigService.getTime(Constants.WORK_END_TIME);
 		int breakMinutes = ruleConfigService.getInt(Constants.MIN_BREAK_MINUTES);
 
-		List<Professionals> professionals = professionalRepository.getCarCleanerProfessionals(Constants.CAR_CLEANER);
+		List<Professionals> professionals = getCarCleanerProfessionals();
 
 		List<CleanerAvailabilityResDTO> response = new ArrayList<>();
 
@@ -303,6 +304,11 @@ public class BookingServiceImpl implements IBookingService {
 	@Transactional
 	public void releaseCleanersForBooking(Long bookingId) {
 		bookingCleanersRepository.releaseCleaners(bookingId);
+	}
+
+	@Cacheable(value = "carCleanerProfessionals")
+	public List<Professionals> getCarCleanerProfessionals() {
+		return professionalRepository.getCarCleanerProfessionals(Constants.CAR_CLEANER);
 	}
 
 }
