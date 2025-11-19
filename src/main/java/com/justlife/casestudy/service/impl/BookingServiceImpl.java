@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.justlife.casestudy.constants.Constants;
 import com.justlife.casestudy.constants.ErrorMsgConstants;
@@ -279,6 +280,11 @@ public class BookingServiceImpl implements IBookingService {
 		logger.info("Total bookings found between dates: {}", bookings.size());
 
 		return bookings;
+	}
+
+	@Transactional
+	public void releaseCleanersForBooking(Long bookingId) {
+		bookingCleanersRepository.releaseCleaners(bookingId);
 	}
 
 }

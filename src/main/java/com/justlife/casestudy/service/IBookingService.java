@@ -26,4 +26,6 @@ public interface IBookingService {
 
 	List<IBookingResponseDTO> getBookingsBetweenDates(LocalDate startDate, LocalDate endDate);
 
+	void releaseCleanersForBooking(Long bookingId);
+
 }

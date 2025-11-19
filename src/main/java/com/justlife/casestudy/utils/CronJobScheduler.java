@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 import com.justlife.casestudy.constants.Constants;
 import com.justlife.casestudy.model.Bookings;
-import com.justlife.casestudy.repository.BookingCleanersRepository;
 import com.justlife.casestudy.repository.BookingRepository;
+import com.justlife.casestudy.service.IBookingService;
 
 /**
  * 
@@ -29,7 +29,7 @@ public class CronJobScheduler {
 	private BookingRepository bookingsRepository;
 
 	@Autowired
-	private BookingCleanersRepository bookingCleanersRepository;
+	private IBookingService bookingService;
 
 	@Scheduled(cron = "0 */5 * * * *") // every 5 minutes
 	public void autoCompleteBookings() {
@@ -51,7 +51,7 @@ public class CronJobScheduler {
 			bookingsRepository.save(booking);
 
 			// release cleaner assignments
-			bookingCleanersRepository.releaseCleaners(booking.getId());
+			bookingService.releaseCleanersForBooking(booking.getId());
 
 			logger.info("Booking {} marked as COMPLETED and cleaners released", booking.getBookingId());
 		}
